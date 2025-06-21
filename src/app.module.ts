@@ -9,6 +9,7 @@ import { UserModule } from '@/modules/user/user.module'
 import { JwtModule } from '@nestjs/jwt'
 import { createJwtConfig } from '@/shared/configs/jwt.config'
 import { AuthModule } from '@/modules/auth/auth.module'
+import { TaskModule } from './modules/task/task.module'
 
 @Module({
   imports: [
@@ -29,7 +30,8 @@ import { AuthModule } from '@/modules/auth/auth.module'
       inject: [ConfigService]
     }),
     UserModule,
-    AuthModule
+    AuthModule,
+    TaskModule
   ],
   controllers: [AppController],
   providers: [AppService]
