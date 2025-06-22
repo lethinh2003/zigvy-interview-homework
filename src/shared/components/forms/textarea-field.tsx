@@ -8,39 +8,39 @@ import {
   FormLabel,
   FormMessage,
 } from "@/shared/components/ui/form";
-import { Input } from "@/shared/components/ui/input";
+import { Textarea } from "@/shared/components/ui/textarea";
 import { cn } from "@/shared/utils";
 import { Asterisk } from "lucide-react";
 
-interface InputFieldProps<T extends FieldValues> {
+interface TextareaFieldProps<T extends FieldValues> {
   control: Control<T>;
   name: Path<T>;
   label?: ReactNode;
   showRequiredMark?: boolean;
   formItemProps?: ComponentProps<typeof FormItem>;
-  inputProps?: ComponentProps<typeof Input>;
+  textareaProps?: ComponentProps<typeof Textarea>;
   labelClassName?: string;
   labelWrapperClassName?: string;
   formMessageClassName?: string;
-  inputClassName?: string;
+  textareaClassName?: string;
   leftElement?: ReactNode;
   rightElement?: ReactNode;
 }
 
-const InputField = <T extends FieldValues>({
+const TextareaField = <T extends FieldValues>({
   control,
   name,
   label,
   showRequiredMark = false,
   formItemProps,
-  inputProps,
+  textareaProps,
   labelClassName,
   labelWrapperClassName,
   formMessageClassName,
-  inputClassName,
+  textareaClassName,
   leftElement,
   rightElement,
-}: InputFieldProps<T>) => {
+}: TextareaFieldProps<T>) => {
   return (
     <FormField
       control={control}
@@ -68,15 +68,15 @@ const InputField = <T extends FieldValues>({
               </div>
             )}
             <FormControl>
-              <div className={cn("flex", inputClassName)}>
+              <div className={cn("flex", textareaClassName)}>
                 {leftElement || rightElement ? (
                   <div className="relative w-full">
                     {leftElement}
-                    <Input {...field} {...inputProps} />
+                    <Textarea {...field} {...textareaProps} />
                     {rightElement}
                   </div>
                 ) : (
-                  <Input {...field} {...inputProps} />
+                  <Textarea {...field} {...textareaProps} />
                 )}
               </div>
             </FormControl>
@@ -89,4 +89,4 @@ const InputField = <T extends FieldValues>({
   );
 };
 
-export { InputField };
+export { TextareaField };

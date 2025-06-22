@@ -8,44 +8,53 @@ import {
   FormLabel,
   FormMessage,
 } from "@/shared/components/ui/form";
-import { Input } from "@/shared/components/ui/input";
+import { DateOfBirthPicker } from "@/shared/components/ui/date-picker";
 import { cn } from "@/shared/utils";
 import { Asterisk } from "lucide-react";
 
-interface InputFieldProps<T extends FieldValues> {
+interface DatePickerFieldProps<T extends FieldValues> {
   control: Control<T>;
   name: Path<T>;
   label?: ReactNode;
   showRequiredMark?: boolean;
   formItemProps?: ComponentProps<typeof FormItem>;
-  inputProps?: ComponentProps<typeof Input>;
+  datePickerProps?: {
+    open?: boolean;
+    setOpen?: (open: boolean) => void;
+  };
   labelClassName?: string;
   labelWrapperClassName?: string;
   formMessageClassName?: string;
-  inputClassName?: string;
+  datePickerClassName?: string;
   leftElement?: ReactNode;
   rightElement?: ReactNode;
 }
 
-const InputField = <T extends FieldValues>({
+const DatePickerField = <T extends FieldValues>({
   control,
   name,
   label,
   showRequiredMark = false,
   formItemProps,
-  inputProps,
+  datePickerProps,
   labelClassName,
   labelWrapperClassName,
   formMessageClassName,
-  inputClassName,
+  datePickerClassName,
   leftElement,
   rightElement,
-}: InputFieldProps<T>) => {
+}: DatePickerFieldProps<T>) => {
   return (
     <FormField
       control={control}
       name={name}
       render={({ field }) => {
+        const handleDateChange = (date: Date | undefined) => {
+          field.onChange(date?.toISOString());
+        };
+
+        const fieldDate = field.value ? new Date(field.value) : undefined;
+
         return (
           <FormItem {...formItemProps}>
             {label && (
@@ -68,15 +77,25 @@ const InputField = <T extends FieldValues>({
               </div>
             )}
             <FormControl>
-              <div className={cn("flex", inputClassName)}>
+              <div className={cn("flex", datePickerClassName)}>
                 {leftElement || rightElement ? (
                   <div className="relative w-full">
                     {leftElement}
-                    <Input {...field} {...inputProps} />
+                    <DateOfBirthPicker
+                      open={datePickerProps?.open || false}
+                      setOpen={datePickerProps?.setOpen || (() => {})}
+                      date={fieldDate}
+                      setDate={handleDateChange}
+                    />
                     {rightElement}
                   </div>
                 ) : (
-                  <Input {...field} {...inputProps} />
+                  <DateOfBirthPicker
+                    open={datePickerProps?.open || false}
+                    setOpen={datePickerProps?.setOpen || (() => {})}
+                    date={fieldDate}
+                    setDate={handleDateChange}
+                  />
                 )}
               </div>
             </FormControl>
@@ -89,4 +108,4 @@ const InputField = <T extends FieldValues>({
   );
 };
 
-export { InputField };
+export { DatePickerField };

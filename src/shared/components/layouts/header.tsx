@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ThemeToggle } from "../ui/theme-toggle";
 import { ProfileDropdown } from "./profile-dropdown";
 import { Suspense } from "react";
+import { SidebarTrigger } from "../ui/sidebar";
 
 const Header = () => {
   return (
@@ -10,7 +11,7 @@ const Header = () => {
       {/* Main Header */}
       <div className="px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          {/* <SidebarTrigger className="text-gray-600 hover:bg-gray-100" /> */}
+          <SidebarTrigger className="text-gray-600 hover:bg-gray-100" />
           <Link href="/">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
