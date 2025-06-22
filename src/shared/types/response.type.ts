@@ -1,9 +1,19 @@
-import { ResponseStatusCodeEnum } from "@/shared/enums/response.enum";
+import { ResponseStatusCodeEnum } from "@/shared/enums";
 
 type SuccessResponse<T> = {
-  data: T;
+  result: T;
   message: string;
   status: ResponseStatusCodeEnum;
 };
 
-export type { SuccessResponse };
+type ErrorResponse = {
+  status: ResponseStatusCodeEnum;
+  message: string;
+  error: unknown;
+  error_code: string;
+  path: string;
+  method: string;
+  timestamp: string;
+};
+
+export type { SuccessResponse, ErrorResponse };

@@ -9,10 +9,12 @@ import { toast } from "sonner";
 
 import { authStore } from "@/modules/auth/stores/auth.store";
 import { UserDetails } from "@/modules/user/types/user.type";
-import { PathEnum } from "@/shared/enums/path.enum";
 
 import localStorageService from "./local-storage.service";
-import { LoginResponse } from "@/modules/auth/types/response.type";
+import {
+  LoginResponse,
+  RegisterResponse,
+} from "@/modules/auth/types/response.type";
 
 interface HttpClient {
   get<R>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<R>>;
@@ -74,10 +76,12 @@ class AxiosClient implements HttpClient {
       async (response) => {
         const { url } = response.config;
 
-        if (url === "/login") {
-          const result = response.data.data as LoginResponse["data"];
-          const { accessToken, user } = result;
-          this.handleAuthResponse({ profile: user, accessToken });
+        if (url === "/sign-in" || url === "/sign-up") {
+          const result = response.data.result as
+            | LoginResponse["result"]
+            | RegisterResponse["result"];
+          const { access_token, user } = result;
+          this.handleAuthResponse({ profile: user, accessToken: access_token });
         } else if (url === "/logout") {
           authStore.getState().logout();
           toast.success("Logged out successfully");
@@ -87,10 +91,9 @@ class AxiosClient implements HttpClient {
       },
       (error) => {
         const { url } = error.config;
-
         if (
           error.response.status === HttpStatusCode.Unauthorized &&
-          url !== PathEnum.LOGIN
+          url !== "/sign-in"
         ) {
           toast.error("Session expired", {
             id: "session_expired",

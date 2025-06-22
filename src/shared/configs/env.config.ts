@@ -10,4 +10,4 @@ const envConfig = createEnv({
   },
 });
 
-export default envConfig;
+export { envConfig };

@@ -1,9 +1,9 @@
-import envConfig from "@/shared/configs/env.config";
+import { envConfig } from "@/shared/configs";
 import AxiosClient, {
   HttpClient,
 } from "@/shared/services/axios-client.service";
-import { LoginBody } from "../types/body.type";
-import { LoginResponse } from "../types/response.type";
+import { LoginBody, RegisterBody } from "../types/body.type";
+import { LoginResponse, RegisterResponse } from "../types/response.type";
 
 const endpoint = "auth";
 
@@ -19,6 +19,14 @@ class AuthClient {
   async login(body: LoginBody) {
     const response = await this.http.post<LoginBody, LoginResponse>(
       "/sign-in",
+      body
+    );
+    return response;
+  }
+
+  async register(body: RegisterBody) {
+    const response = await this.http.post<RegisterBody, RegisterResponse>(
+      "/sign-up",
       body
     );
     return response;
