@@ -24,7 +24,8 @@ export class AuthService {
 
     const payload = { sub: user.id, username: user.email }
     return {
-      access_token: await this.jwtService.signAsync(payload)
+      access_token: await this.jwtService.signAsync(payload),
+      user: user
     }
   }
 
@@ -39,7 +40,8 @@ export class AuthService {
 
     const payload = { sub: newUser.id, username: newUser.email }
     return {
-      access_token: await this.jwtService.signAsync(payload)
+      access_token: await this.jwtService.signAsync(payload),
+      user: newUser
     }
   }
 }

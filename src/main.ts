@@ -17,6 +17,10 @@ async function bootstrap() {
     })
   )
 
+  app.enableCors({
+    origin: configService.get<string>('CLIENT_URL'),
+    credentials: true
+  })
   app.useGlobalInterceptors(new LoggingInterceptor())
   app.useGlobalInterceptors(new GlobalResponseInterceptor())
   app.useGlobalFilters(new AllExceptionsFilter())
