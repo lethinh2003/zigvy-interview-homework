@@ -1,10 +1,12 @@
-// import Cookies from "js-cookie";
+import { deleteCookie, setCookie } from "cookies-next/client";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 
 import { UserDetails } from "@/modules/user/types/user.type";
 import localStorageService from "@/shared/services/local-storage.service";
+import { envConfig } from "@/shared/configs";
+import { parseTimeString } from "@/shared/utils";
 
 type AuthState = {
   isAuthenticated: boolean;
@@ -32,6 +34,14 @@ const useAuthStore = create<AuthState>()(
 
           localStorageService.set("accessToken", state.accessToken);
           localStorageService.set("profile", state.profile);
+          setCookie("accessToken", state.accessToken, {
+            expires: new Date(
+              Date.now() + parseTimeString(envConfig.NEXT_PUBLIC_JWT_EXPIRED_IN)
+            ),
+            path: "/",
+            sameSite: "strict",
+            secure: process.env.NODE_ENV === "production",
+          });
         }),
 
       logout: () => {
@@ -43,9 +53,7 @@ const useAuthStore = create<AuthState>()(
 
         localStorageService.remove("profile");
         localStorageService.remove("accessToken");
-
-        // Cookies.remove("auth_token");
-        // Cookies.remove("redirect_url");
+        deleteCookie("accessToken");
       },
     })),
     { name: "AuthStore" }
