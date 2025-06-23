@@ -33,7 +33,7 @@ function LoginForm() {
     try {
       await loginMutation.mutateAsync(data);
       toast.success("Login successful");
-      router.push(PathEnum.HOME);
+      window.location.href = PathEnum.HOME;
     } catch (error: unknown) {
       const errorMessage = (error as AxiosError<ErrorResponse>).response?.data
         .error;

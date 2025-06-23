@@ -34,7 +34,7 @@ function RegisterForm() {
     try {
       await registerMutation.mutateAsync(data);
       toast.success("Register successful");
-      router.push(PathEnum.HOME);
+      window.location.href = PathEnum.HOME;
     } catch (error: unknown) {
       const errorMessage = (error as AxiosError<ErrorResponse>).response?.data
         .error;

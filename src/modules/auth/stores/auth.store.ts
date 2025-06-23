@@ -7,6 +7,7 @@ import { UserDetails } from "@/modules/user/types/user.type";
 import localStorageService from "@/shared/services/local-storage.service";
 import { envConfig } from "@/shared/configs";
 import { parseTimeString } from "@/shared/utils";
+import { PathEnum } from "@/shared/enums";
 
 type AuthState = {
   isAuthenticated: boolean;
@@ -40,7 +41,6 @@ const useAuthStore = create<AuthState>()(
             ),
             path: "/",
             sameSite: "strict",
-            secure: process.env.NODE_ENV === "production",
           });
         }),
 
@@ -53,7 +53,10 @@ const useAuthStore = create<AuthState>()(
 
         localStorageService.remove("profile");
         localStorageService.remove("accessToken");
-        deleteCookie("accessToken");
+        deleteCookie("accessToken", {
+          path: "/",
+        });
+        window.location.href = PathEnum.LOGIN;
       },
     })),
     { name: "AuthStore" }
