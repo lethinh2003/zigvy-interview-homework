@@ -7,13 +7,20 @@ import { UserDocument } from '../user/schemas/user.schema'
 import { EditTaskDto } from './dtos/edit-task.dto'
 import { TaskStatus } from './enums/task-status.enum'
 import { TaskDocument } from './schemas/task.schema'
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger'
 
+@ApiTags('Task')
+@ApiBearerAuth()
 @Controller('tasks')
 class TaskController {
   constructor(private readonly taskService: TaskService) {}
 
   @Get()
   @Authentication()
+  @ApiOperation({ summary: 'Get all tasks with optional filtering' })
+  @ApiQuery({ name: 'title', type: String, required: false, description: 'Filter by title' })
+  @ApiQuery({ name: 'dueDate', type: String, required: false, description: 'Filter by due date' })
+  @ApiQuery({ name: 'status', enum: TaskStatus, required: false, description: 'Filter by status' })
   async getTasks(
     @Query('title') title: string,
     @Query('dueDate') dueDate: string,
@@ -31,6 +38,9 @@ class TaskController {
 
   @Patch(':id')
   @Authentication()
+  @ApiOperation({ summary: 'Edit a task' })
+  @ApiParam({ name: 'id', type: String, description: 'The ID of the task' })
+  @ApiBody({ type: EditTaskDto, description: 'The task to edit' })
   async editTask(@Param('id') taskId: string, @Body() taskUpdate: EditTaskDto, @AuthUser() user: UserDocument) {
     // Get the current task and verify ownership
     const currentTask = await this.taskService.getTask(taskId, user._id.toString())
@@ -148,6 +158,8 @@ class TaskController {
 
   @Delete(':id')
   @Authentication()
+  @ApiOperation({ summary: 'Delete a task' })
+  @ApiParam({ name: 'id', type: String, description: 'The ID of the task' })
   async deleteTask(@Param('id') taskId: string, @AuthUser() user: UserDocument) {
     return await this.taskService.deleteTask(taskId, user)
   }

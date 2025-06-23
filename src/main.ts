@@ -5,6 +5,7 @@ import { GlobalResponseInterceptor } from '@/shared/interceptors/global-response
 import { LoggingInterceptor } from '@/shared/interceptors/logging.interceptor'
 import { AllExceptionsFilter } from '@/shared/exceptions/all-exceptions.filter'
 import { ValidationPipe } from '@nestjs/common'
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
@@ -24,6 +25,17 @@ async function bootstrap() {
   app.useGlobalInterceptors(new LoggingInterceptor())
   app.useGlobalInterceptors(new GlobalResponseInterceptor())
   app.useGlobalFilters(new AllExceptionsFilter())
+
+  const config = new DocumentBuilder()
+    .setTitle('Zigtask API')
+    .setDescription('Task Manager API')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .addTag('Task')
+    .addTag('Auth')
+    .build()
+  const documentFactory = () => SwaggerModule.createDocument(app, config)
+  SwaggerModule.setup('api', app, documentFactory)
 
   const port = configService.get('PORT')
   await app.listen(port)

@@ -6,10 +6,4 @@ import { Authentication } from '../auth/decorators/authentication.decorator'
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
-
-  @Get()
-  @Authentication()
-  async getList() {
-    return await this.userService.getList()
-  }
 }
