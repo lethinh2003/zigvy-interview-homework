@@ -1,5 +1,5 @@
-import { plainToInstance } from 'class-transformer'
-import { IsEnum, IsNumber, IsString, validateSync } from 'class-validator'
+import { plainToInstance, Transform } from 'class-transformer'
+import { IsEnum, IsNumber, IsOptional, IsString, validateSync } from 'class-validator'
 
 class EnvironmentVariables {
   @IsEnum(['development', 'production', 'test'])
@@ -13,6 +13,11 @@ class EnvironmentVariables {
 
   @IsString()
   JWT_SECRET: string
+
+  @IsString()
+  @IsOptional()
+  @Transform(({ value }) => value || '24h')
+  JWT_EXPIRED_IN: string
 
   @IsString()
   DATABASE_URL: string
