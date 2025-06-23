@@ -1,4 +1,4 @@
-import { IsDate, IsEnum, IsOptional, IsString } from 'class-validator'
+import { IsDate, IsEnum, IsNumber, IsOptional, IsString } from 'class-validator'
 import { TaskStatus } from '../enums/task-status.enum'
 
 class EditTaskDto {
@@ -17,6 +17,10 @@ class EditTaskDto {
   @IsEnum(TaskStatus)
   @IsOptional()
   status?: TaskStatus
+
+  @IsNumber()
+  @IsOptional()
+  priority?: number
 }
 
 export { EditTaskDto }

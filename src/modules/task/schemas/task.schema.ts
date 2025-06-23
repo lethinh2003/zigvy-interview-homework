@@ -14,6 +14,9 @@ class Task {
   @Prop({ required: true, enum: TaskStatus, default: TaskStatus.TODO })
   status: TaskStatus
 
+  @Prop({ required: true, default: 0 })
+  priority: number
+
   @Prop({ required: false })
   dueDate?: Date
 
