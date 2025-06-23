@@ -19,6 +19,7 @@ import { PathEnum } from "@/shared/enums";
 import { cn } from "@/shared/utils";
 import { LayoutDashboard, Plus, Settings } from "lucide-react";
 import Link from "next/link";
+import { Suspense } from "react";
 
 function AppSidebar() {
   const { state } = useSidebar();
@@ -32,24 +33,26 @@ function AppSidebar() {
       className="border-r border-gray-200 dark:border-gray-800"
     >
       <SidebarHeader className={cn("p-4", isCollapsed ? "px-2" : "")}>
-        {isAuthenticated && (
-          <TaskDialog
-            dialogTrigger={
-              <Button
-                onClick={() => {
-                  openCreateTaskDialog();
-                }}
-                disabled={!isAuthenticated}
-                className={`w-full bg-purple-600 hover:bg-purple-700 text-white font-medium ${
-                  isCollapsed ? "" : "px-2"
-                }`}
-              >
-                <Plus className="w-4 h-4" />
-                {!isCollapsed && <span className="ml-2">Add New</span>}
-              </Button>
-            }
-          />
-        )}
+        <Suspense>
+          {isAuthenticated && (
+            <TaskDialog
+              dialogTrigger={
+                <Button
+                  onClick={() => {
+                    openCreateTaskDialog();
+                  }}
+                  disabled={!isAuthenticated}
+                  className={`w-full bg-purple-600 hover:bg-purple-700 text-white font-medium ${
+                    isCollapsed ? "" : "px-2"
+                  }`}
+                >
+                  <Plus className="w-4 h-4" />
+                  {!isCollapsed && <span className="ml-2">Add New</span>}
+                </Button>
+              }
+            />
+          )}
+        </Suspense>
       </SidebarHeader>
 
       <SidebarContent>
