@@ -1,6 +1,17 @@
 import { SuccessResponse } from "@/shared/types";
-import { Task } from "./task.type";
+import { Task, TaskDetails } from "./task.type";
 
 type CreateTaskResponse = SuccessResponse<Task>;
 
-export type { CreateTaskResponse };
+type GetTasksResponse = SuccessResponse<TaskDetails[]>;
+
+type UpdateTaskResponse = SuccessResponse<Task>;
+
+type DeleteTaskResponse = SuccessResponse<null>;
+
+export type {
+  CreateTaskResponse,
+  GetTasksResponse,
+  UpdateTaskResponse,
+  DeleteTaskResponse,
+};

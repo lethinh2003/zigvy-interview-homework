@@ -1,5 +1,7 @@
-import { CreateTaskFormData } from "../schemas";
+import { CreateTaskFormData, UpdateTaskFormData } from "../schemas";
 
 type CreateTaskBody = CreateTaskFormData;
 
-export type { CreateTaskBody };
+type UpdateTaskBody = UpdateTaskFormData;
+
+export type { CreateTaskBody, UpdateTaskBody };

@@ -1,4 +1,4 @@
-import { TaskFilters } from "@/modules/task/components";
+import { TaskBoard, TaskFilters } from "@/modules/task/components";
 import { Suspense } from "react";
 
 export default function TasksPage() {
@@ -7,6 +7,12 @@ export default function TasksPage() {
       <Suspense>
         <TaskFilters />
       </Suspense>
+
+      <div className="mt-4">
+        <Suspense>
+          <TaskBoard />
+        </Suspense>
+      </div>
     </div>
   );
 }

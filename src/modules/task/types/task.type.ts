@@ -5,10 +5,11 @@ type Task = {
   _id: string;
   title: string;
   description: string;
-  dueDate: Date;
-  createdAt: Date;
-  updatedAt: Date;
+  dueDate: string;
+  createdAt: string;
+  updatedAt: string;
   status: TaskStatus;
+  priority: number;
 };
 
 type TaskDetails = Task & {

@@ -1,6 +1,12 @@
 "use client";
 
 import {
+  DatePickerField,
+  InputField,
+  SelectField,
+  TextareaField,
+} from "@/shared/components/forms";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -8,48 +14,122 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/shared/components/ui/dialog";
-import { useForm } from "react-hook-form";
-import { CreateTaskFormData, createTaskSchema } from "../schemas";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useCreateTaskMutation } from "../hooks/mutations";
 import { Form } from "@/shared/components/ui/form";
-import {
-  DatePickerField,
-  InputField,
-  TextareaField,
-} from "@/shared/components/forms";
-import { useState } from "react";
 import { LoadingButton } from "@/shared/components/ui/loading-button";
-import { toast } from "sonner";
-import { AxiosError } from "axios";
+import { useSearchParams } from "@/shared/hooks";
 import { ErrorResponse } from "@/shared/types";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { TaskStatus } from "../enums";
+import {
+  useCreateTaskMutation,
+  useUpdateTaskMutation,
+} from "../hooks/mutations";
+import { useDeleteTaskMutation } from "../hooks/mutations/use-delete-task.mutation";
+import { useGetTasksQuery } from "../hooks/queries";
+import {
+  CreateTaskFormData,
+  createTaskSchema,
+  UpdateTaskFormData,
+  updateTaskSchema,
+} from "../schemas";
+import { useTaskStore } from "../stores/task.store";
 
 type TaskDialogProps = {
-  open: boolean;
-  setOpen: (open: boolean) => void;
   dialogTrigger: React.ReactNode;
 };
 
-const TaskDialog = ({ open, setOpen, dialogTrigger }: TaskDialogProps) => {
+const TaskDialog = ({ dialogTrigger }: TaskDialogProps) => {
   const [datePickerOpen, setDatePickerOpen] = useState(false);
 
-  const form = useForm<CreateTaskFormData>({
-    resolver: zodResolver(createTaskSchema),
-    defaultValues: {
-      title: "",
-      description: "",
-      dueDate: undefined,
+  const queryClient = useQueryClient();
+  const { getParam } = useSearchParams();
+
+  const queryKey = [
+    "tasks",
+    {
+      title: getParam("title"),
+      dueDate: getParam("date"),
     },
+  ];
+
+  const {
+    defaultTaskStatus,
+    isOpenTaskDialog,
+    setIsOpenTaskDialog,
+    dialogMode,
+    selectedTask,
+    getInitialValues,
+  } = useTaskStore();
+
+  const form = useForm<CreateTaskFormData | UpdateTaskFormData>({
+    resolver: zodResolver(
+      dialogMode === "create" ? createTaskSchema : updateTaskSchema
+    ),
+    defaultValues: getInitialValues(selectedTask),
   });
+  useEffect(() => {
+    form.reset(getInitialValues(selectedTask));
+  }, [selectedTask, dialogMode]);
+
+  useEffect(() => {
+    console.log(defaultTaskStatus, dialogMode);
+    if (dialogMode === "create") {
+      form.setValue("status", defaultTaskStatus);
+    }
+  }, [dialogMode, defaultTaskStatus]);
+
+  const currentStatus = form.watch("status");
 
   const createTaskMutation = useCreateTaskMutation();
+  const updateTaskMutation = useUpdateTaskMutation();
+  const deleteTaskMutation = useDeleteTaskMutation();
 
-  const onSubmit = async (data: CreateTaskFormData) => {
+  const { data: tasksByNewStatus, refetch: refetchTasksByNewStatus } =
+    useGetTasksQuery(
+      {
+        status: currentStatus as TaskStatus,
+      },
+      {
+        enabled: !!currentStatus,
+      }
+    );
+
+  const invalidateTasksQuery = () => {
+    queryClient.invalidateQueries({ queryKey });
+  };
+
+  const onSubmit = async (data: CreateTaskFormData | UpdateTaskFormData) => {
     try {
-      await createTaskMutation.mutateAsync(data);
-      toast.success("Task created successfully");
-      setOpen(false);
+      if (dialogMode === "create") {
+        await createTaskMutation.mutateAsync(data);
+        toast.success("Task created successfully");
+      } else {
+        if (!selectedTask) return;
+        let newPriority = selectedTask.priority;
+        if (selectedTask.status !== data.status) {
+          await refetchTasksByNewStatus();
+          const tasks = tasksByNewStatus?.data.result || [];
+          newPriority = tasks?.length ? tasks.length + 1 : 1;
+        }
+        const newData = {
+          ...data,
+          priority: newPriority,
+        };
+
+        await updateTaskMutation.mutateAsync({
+          id: selectedTask?._id as string,
+          body: newData as UpdateTaskFormData,
+        });
+        toast.success("Task updated successfully");
+      }
+      setIsOpenTaskDialog(false);
       form.reset();
+      invalidateTasksQuery();
     } catch (error) {
       const errorMessage = (error as AxiosError<ErrorResponse>).response?.data
         .error;
@@ -57,16 +137,37 @@ const TaskDialog = ({ open, setOpen, dialogTrigger }: TaskDialogProps) => {
     }
   };
 
-  console.log(form.getValues());
+  const onDeleteTask = async () => {
+    const confirm = window.confirm(
+      "Are you sure you want to delete this task?"
+    );
+    if (!confirm) return;
+    try {
+      await deleteTaskMutation.mutateAsync({ id: selectedTask?._id as string });
+      toast.success("Task deleted successfully");
+      setIsOpenTaskDialog(false);
+      invalidateTasksQuery();
+    } catch (error) {
+      const errorMessage = (error as AxiosError<ErrorResponse>).response?.data
+        .error;
+      toast.error(errorMessage as string);
+    }
+  };
 
   return (
     <div>
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={isOpenTaskDialog} onOpenChange={setIsOpenTaskDialog}>
         <DialogTrigger asChild>{dialogTrigger}</DialogTrigger>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Task</DialogTitle>
-            <DialogDescription>Add a new task to your list.</DialogDescription>
+            <DialogTitle>
+              {dialogMode === "create" ? "Add Task" : "Edit Task"}
+            </DialogTitle>
+            <DialogDescription>
+              {dialogMode === "create"
+                ? "Add a new task to your list."
+                : "Edit the task details."}
+            </DialogDescription>
           </DialogHeader>
           <Form {...form}>
             <form
@@ -108,13 +209,38 @@ const TaskDialog = ({ open, setOpen, dialogTrigger }: TaskDialogProps) => {
                   }}
                 />
               </div>
+              <div className="space-y-2">
+                <SelectField
+                  control={form.control}
+                  name="status"
+                  label="Status"
+                  options={Object.values(TaskStatus).map((status) => ({
+                    value: status,
+                    label: status,
+                  }))}
+                />
+              </div>
               <LoadingButton
                 type="submit"
                 loading={form.formState.isSubmitting}
-                disabled={createTaskMutation.isPending}
+                disabled={
+                  createTaskMutation.isPending || updateTaskMutation.isPending
+                }
               >
-                Add Task
+                {dialogMode === "create" ? "Add Task" : "Update Task"}
               </LoadingButton>
+
+              {dialogMode === "edit" && (
+                <LoadingButton
+                  variant="destructive"
+                  type="button"
+                  onClick={onDeleteTask}
+                  loading={deleteTaskMutation.isPending}
+                  disabled={deleteTaskMutation.isPending}
+                >
+                  Delete Task
+                </LoadingButton>
+              )}
             </form>
           </Form>
         </DialogContent>
